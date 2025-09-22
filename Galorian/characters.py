@@ -19,15 +19,15 @@ class Player:
         self.items = items
         self.experience = experience
 
-   def heal (self, amount):
-       healed_amount = min(amount, self.max_hit_points - self.hit_poits)
-       self.hit_points += healed_amount
-       return healed_amount
+    def heal (self, amount):
+        healed_amount = min(amount, self.max_hit_points - self.hit_poits)
+        self.hit_points += healed_amount
+        return healed_amount
 
-   def restore_resources(self):
-      self.hit_points = self.max_hit_points
-      self.mp = self.max_mp
-      self.stamina = self.max_samina
+    def restore_resources(self):
+        self.hit_points = self.max_hit_points
+        self.mp = self.max_mp
+        self.stamina = self.max_samina
     
     def take_damage(self, damage):
         self.hit_points -= damage
@@ -91,7 +91,3 @@ class Enemy:
                 target.take_damage(damage)
             else:
                 print(f"{self.name} has no special attack.")
-
-
-
-
