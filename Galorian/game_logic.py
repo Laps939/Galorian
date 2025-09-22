@@ -70,11 +70,7 @@ def battle(player, enemy):
 
 def inn_rest(player):
     print("You rest at the inn. Your health and resources have been fully restored!")
-    player.hit_points = player.max_hit_points
-    if player.character_class_id in [1, 3]:
-        player.stamina = player.max_stamina
-    else:
-        player.mp = player.max_mp
+    player.restore_resources() # Much cleaner!
 
 def visit_shop(player):
     print("Welcome to the shop!")
@@ -168,3 +164,4 @@ def town_gameplay(player):
             print_inventory(player)
         else:
             print("Invalid choice.")
+
