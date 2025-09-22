@@ -1,0 +1,100 @@
+import random
+from characters import Player, Enemy
+from game_data import pathfinder_classes
+
+def apply_damage(target, damage):
+    # This is a helper function used by many attacks
+    target.take_damage(damage)
+
+def attack(attacker, target):
+    if isinstance(attacker, Player):
+        if attacker.weapon and "dice" in attacker.weapon:
+            num_dice, dice_faces = attacker.weapon["dice"]
+            damage_dealt = sum(random.randint(1, dice_faces) for _ in range(num_dice))
+            
+            class_id = attacker.character_class_id
+            damage_dice = pathfinder_classes[class_id]["damage_dice"]
+            class_damage_bonus = random.randint(damage_dice[0], damage_dice[1])
+            
+            total_damage = damage_dealt + class_damage_bonus
+            print(f"{attacker.name} attacks {target.name} for {total_damage} damage!")
+            apply_damage(target, total_damage)
+        else:
+            print(f"{attacker.name} has no weapon!")
+
+    elif isinstance(attacker, Enemy):
+        if attacker.is_alive:
+            # Enemy regular attack logic
+            damage_roll = random.randint(attacker.damage_range[0], attacker.damage_range[1])
+            print(f"{attacker.name} attacks {target.name} for {damage_roll} damage!")
+            apply_damage(target, damage_roll)
+
+# --- Special Attack Dispatchers ---
+def special_attack_stamina(player, enemy):
+    if player.character_class_id == 1:
+        fighter_special_attack(player, enemy)
+    elif player.character_class_id == 3:
+        rogue_special_attack(player, enemy)
+    else:
+        print("This class does not have a stamina-based special attack.")
+
+def special_attack_mp(player, enemy):
+    if player.character_class_id == 2:
+        wizard_special_attack(player, enemy)
+    elif player.character_class_id == 4:
+        cleric_special_attack(player, enemy)
+    elif player.character_class_id == 5:
+        paladin_special_attack(player, enemy)
+    else:
+        print("This class does not have an MP-based special attack.")
+
+# --- Class-Specific Special Attacks ---
+def fighter_special_attack(player, enemy):
+    if player.stamina >= 20:
+        player.stamina -= 20
+        total_damage = random.randint(25, 35)
+        print(f"{player.name} performs a Whirlwind Slash, dealing {total_damage} damage!")
+        apply_damage(enemy, total_damage)
+    else:
+        print("Not enough stamina to perform the Whirlwind Slash.")
+
+def rogue_special_attack(player, enemy):
+    if player.stamina >= 15:
+        player.stamina -= 15
+        total_damage = random.randint(30, 40)
+        if random.randint(1, 10) > 7: # 30% crit chance
+            total_damage *= 2
+            print(f"{player.name} performs a Shadowstep Backstab, landing a critical hit for {total_damage} damage!")
+        else:
+            print(f"{player.name} performs a Shadowstep Backstab, dealing {total_damage} damage!")
+        apply_damage(enemy, total_damage)
+    else:
+        print("Not enough stamina to perform the Shadowstep Backstab.")
+
+def wizard_special_attack(player, enemy):
+    # Simplified version for clarity
+    if player.mp >= 25:
+        player.mp -= 25
+        fireball_damage = random.randint(15, 20)
+        print(f"{player.name} casts a blazing Fireball for {fireball_damage} damage!")
+        apply_damage(enemy, fireball_damage)
+    else:
+        print("Not enough MP to cast Fireball!")
+
+def cleric_special_attack(player, enemy):
+    if player.mp >= 10:
+        player.mp -= 10
+        healing_amount = random.randint(15, 20)
+        player.hit_points = min(player.max_hit_points, player.hit_points + healing_amount)
+        print(f"{player.name} casts Healing Light and restores {healing_amount} health.")
+    else:
+        print("Not enough MP to cast Healing Light!")
+
+def paladin_special_attack(player, enemy):
+    if player.mp >= 15:
+        player.mp -= 15
+        smite_damage = random.randint(12, 18)
+        print(f"{player.name} casts Smite, dealing {smite_damage} holy damage to {enemy.name}!")
+        apply_damage(enemy, smite_damage)
+    else:
+        print("Not enough MP to cast Smite.")
