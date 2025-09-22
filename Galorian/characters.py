@@ -1,5 +1,3 @@
-# characters.py
-
 import random
 
 class Player:
@@ -85,3 +83,4 @@ class Enemy:
                 target.take_damage(damage)
             else:
                 print(f"{self.name} has no special attack.")
+
