@@ -13,7 +13,7 @@ def attack(attacker, target):
             
             class_id = attacker.character_class_id
             damage_dice = pathfinder_classes[class_id]["damage_dice"]
-            class_damage_bonus = random.randint(damage_dice[0], damage_dice[1])
+            class_damage_bonus = random.randint(*damage_dice)
             
             total_damage = damage_dealt + class_damage_bonus
             print(f"{attacker.name} attacks {target.name} for {total_damage} damage!")
@@ -22,18 +22,15 @@ def attack(attacker, target):
             print(f"{attacker.name} has no weapon!")
 
     elif isinstance(attacker, Enemy):
-        if attacker.is_alive:
-            damage_roll = random.randint(attacker.damage_range[0], attacker.damage_range[1])
-            print(f"{attacker.name} attacks {target.name} for {damage_roll} damage!")
-            apply_damage(target, damage_roll)
+        damage_roll = random.randint(*attacker.damage_range)
+        print(f"{attacker.name} attacks {target.name} for {damage_roll} damage!")
+        apply_damage(target, damage_roll)
 
 def special_attack_stamina(player, enemy):
     if player.character_class_id == 1:
         fighter_special_attack(player, enemy)
     elif player.character_class_id == 3:
         rogue_special_attack(player, enemy)
-    else:
-        print("This class does not have a stamina-based special attack.")
 
 def special_attack_mp(player, enemy):
     if player.character_class_id == 2:
@@ -42,55 +39,69 @@ def special_attack_mp(player, enemy):
         cleric_special_attack(player, enemy)
     elif player.character_class_id == 5:
         paladin_special_attack(player, enemy)
-    else:
-        print("This class does not have an MP-based special attack.")
 
 def fighter_special_attack(player, enemy):
-    if player.stamina >= 20:
-        player.stamina -= 20
-        total_damage = random.randint(25, 35)
-        print(f"{player.name} performs a Whirlwind Slash, dealing {total_damage} damage!")
-        apply_damage(enemy, total_damage)
+    skill_info = pathfinder_classes[player.character_class_id]["skills"]["whirlwind"]
+    if player.stamina >= skill_info["cost"]:
+        player.stamina -= skill_info["cost"]
+        damage = random.randint(*skill_info["damage_range"])
+        print(f"{player.name} performs a {skill_info['name']} for {damage} damage!")
+        apply_damage(enemy, damage)
     else:
-        print("Not enough stamina to perform the Whirlwind Slash.")
+        print(f"Not enough stamina for {skill_info['name']}.")
 
 def rogue_special_attack(player, enemy):
-    if player.stamina >= 15:
-        player.stamina -= 15
-        total_damage = random.randint(30, 40)
-        if random.randint(1, 10) > 7: # 30% crit chance
-            total_damage *= 2
-            print(f"{player.name} performs a Shadowstep Backstab, landing a critical hit for {total_damage} damage!")
+    skill_info = pathfinder_classes[player.character_class_id]["skills"]["backstab"]
+    if player.stamina >= skill_info["cost"]:
+        player.stamina -= skill_info["cost"]
+        damage = random.randint(*skill_info["damage_range"])
+        if random.random() < skill_info["crit_chance"]:
+            damage *= 2
+            print(f"{player.name}'s {skill_info['name']} is a critical hit for {damage} damage!")
         else:
-            print(f"{player.name} performs a Shadowstep Backstab, dealing {total_damage} damage!")
-        apply_damage(enemy, total_damage)
+            print(f"{player.name} performs {skill_info['name']} for {damage} damage!")
+        apply_damage(enemy, damage)
     else:
-        print("Not enough stamina to perform the Shadowstep Backstab.")
+        print(f"Not enough stamina for {skill_info['name']}.")
 
 def wizard_special_attack(player, enemy):
-    if player.mp >= 25:
-        player.mp -= 25
-        fireball_damage = random.randint(15, 20)
-        print(f"{player.name} casts a blazing Fireball for {fireball_damage} damage!")
-        apply_damage(enemy, fireball_damage)
+    skill_info = pathfinder_classes[player.character_class_id]["skills"]["fireball"]
+    if player.mp >= skill_info["cost"]:
+        player.mp -= skill_info["cost"]
+        damage = random.randint(*skill_info["damage_range"])
+        print(f"{player.name} casts {skill_info['name']} for {damage} damage!")
+        apply_damage(enemy, damage)
     else:
-        print("Not enough MP to cast Fireball!")
+        print(f"Not enough MP for {skill_info['name']}.")
 
 def cleric_special_attack(player, enemy):
-    if player.mp >= 10:
-        player.mp -= 10
-        healing_amount = random.randint(15, 20)
-        player.heal(healing_amount)
-        print(f"{player.name} casts Healing Light and restores {healing_amount} health.")
+    skill_info = pathfinder_classes[player.character_class_id]["skills"]["healing_light"]
+    if player.mp >= skill_info["cost"]:
+        player.mp -= skill_info["cost"]
+        heal_amount = random.randint(*skill_info["heal_range"])
+        print(f"{player.name} casts {skill_info['name']}.")
+        player.heal(heal_amount)
     else:
-        print("Not enough MP to cast Healing Light!")
+        print(f"Not enough MP for {skill_info['name']}.")
 
 def paladin_special_attack(player, enemy):
-    if player.mp >= 15:
-        player.mp -= 15
-        smite_damage = random.randint(12, 18)
-        print(f"{player.name} casts Smite, dealing {smite_damage} holy damage to {enemy.name}!")
-        apply_damage(enemy, smite_damage)
-    else:
-        print("Not enough MP to cast Smite.")
-
+    smite_info = pathfinder_classes[player.character_class_id]["skills"]["smite"]
+    cure_info = pathfinder_classes[player.character_class_id]["skills"]["cure_wounds"]
+    
+    choice = input(f"Choose spell: 1. {smite_info['name']} ({smite_info['cost']} MP) or 2. {cure_info['name']} ({cure_info['cost']} MP): ")
+    if choice == '1':
+        if player.mp >= smite_info["cost"]:
+            player.mp -= smite_info["cost"]
+            damage = random.randint(*smite_info["damage_range"])
+            print(f"{player.name} casts {smite_info['name']} for {damage} holy damage!")
+            apply_damage(enemy, damage)
+        else:
+            print(f"Not enough MP for {smite_info['name']}.")
+    elif choice == '2':
+        if player.mp >= cure_info["cost"]:
+            player.mp -= cure_info["cost"]
+            heal_amount = random.randint(*cure_info["heal_range"])
+            print(f"{player.name} casts {cure_info['name']}.")
+            player.heal(heal_amount)
+        else:
+            print(f"Not enough MP for {cure_info['name']}.")
