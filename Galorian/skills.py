@@ -3,7 +3,6 @@ from characters import Player, Enemy
 from game_data import pathfinder_classes
 
 def apply_damage(target, damage):
-    # This is a helper function used by many attacks
     target.take_damage(damage)
 
 def attack(attacker, target):
@@ -24,12 +23,10 @@ def attack(attacker, target):
 
     elif isinstance(attacker, Enemy):
         if attacker.is_alive:
-            # Enemy regular attack logic
             damage_roll = random.randint(attacker.damage_range[0], attacker.damage_range[1])
             print(f"{attacker.name} attacks {target.name} for {damage_roll} damage!")
             apply_damage(target, damage_roll)
 
-# --- Special Attack Dispatchers ---
 def special_attack_stamina(player, enemy):
     if player.character_class_id == 1:
         fighter_special_attack(player, enemy)
@@ -48,7 +45,6 @@ def special_attack_mp(player, enemy):
     else:
         print("This class does not have an MP-based special attack.")
 
-# --- Class-Specific Special Attacks ---
 def fighter_special_attack(player, enemy):
     if player.stamina >= 20:
         player.stamina -= 20
@@ -72,7 +68,6 @@ def rogue_special_attack(player, enemy):
         print("Not enough stamina to perform the Shadowstep Backstab.")
 
 def wizard_special_attack(player, enemy):
-    # Simplified version for clarity
     if player.mp >= 25:
         player.mp -= 25
         fireball_damage = random.randint(15, 20)
@@ -85,7 +80,7 @@ def cleric_special_attack(player, enemy):
     if player.mp >= 10:
         player.mp -= 10
         healing_amount = random.randint(15, 20)
-        player.hit_points = min(player.max_hit_points, player.hit_points + healing_amount)
+        player.heal(healing_amount)
         print(f"{player.name} casts Healing Light and restores {healing_amount} health.")
     else:
         print("Not enough MP to cast Healing Light!")
@@ -98,3 +93,4 @@ def paladin_special_attack(player, enemy):
         apply_damage(enemy, smite_damage)
     else:
         print("Not enough MP to cast Smite.")
+
