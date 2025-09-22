@@ -41,8 +41,6 @@ class Player:
         if self.experience >= level_threshold:
             self.level += 1
             self.experience -= level_threshold
-            # Note: This line had a bug, it should probably be `level_threshold += 15`
-            # self.level_threshold = + 15
             
             print(f"Congratulations! {self.name} has reached level {self.level}!")
 
@@ -93,6 +91,7 @@ class Enemy:
                 target.take_damage(damage)
             else:
                 print(f"{self.name} has no special attack.")
+
 
 
 
